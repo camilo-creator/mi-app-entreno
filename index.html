@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mi Entreno - Calistenia</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            padding-bottom: 80px;
+        }
+
+        /* Pestañas */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(30, 30, 35, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            border-top: 0.5px solid #333;
+            padding: 10px 0 20px;
+            z-index: 100;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            color: #888;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .tab.active {
+            color: #00ff88;
+        }
+
+        .tab-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Pantallas */
+        .screen {
+            display: none;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* Tarjetas de rutinas */
+        .routine-card {
+            background: linear-gradient(135deg, #1c1c1e 0%, #2a2a2e 100%);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            border: 1px solid #333;
+        }
+
+        .routine-card:active {
+            transform: scale(0.98);
+            background: #2c2c2e;
+        }
+
+        .routine-name {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .routine-day {
+            font-size: 14px;
+            color: #00ff88;
+            margin-top: 4px;
+        }
+
+        .routine-time {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* Ejercicios */
+        .exercise-card {
+            background: #1c1c1e;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #333;
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .exercise-image {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 12px;
+            background: #2a2a2e;
+        }
+
+        .exercise-info {
+            flex: 1;
+        }
+
+        .exercise-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .exercise-target {
+            color: #888;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .series-counter {
+            color: #00ff88;
+            font-size: 14px;
+            margin: 12px 0;
+            padding: 8px;
+            background: #2a2a2e;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .reps-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .rep-btn {
+            background: #2c2c2e;
+            border: none;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 12px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.1s;
+            min-width: 60px;
+        }
+
+        .rep-btn:active {
+            background: #00ff88;
+            color: #000;
+            transform: scale(0.95);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #00ff88;
+            color: #00ff88;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 28px;
+        }
+
+        /* GRÁFICOS MEJORADOS */
+        .stats-container {
+            background: linear-gradient(135deg, #0a0a0c 0%, #1a1a1e 100%);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stats-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stats-badge {
+            background: #00ff8822;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #00ff88;
+        }
+
+        .chart-container {
+            background: #1c1c1e;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 180px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 55px;
+        }
+
+        .bar {
+            width: 40px;
+            background: linear-gradient(180deg, #00ff88 0%, #00cc66 100%);
+            border-radius: 8px 8px 4px 4px;
+            transition: height 0.3s;
+            position: relative;
+        }
+
+        .bar-value {
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: #00ff88;
+        }
+
+        .bar-label {
+            font-size: 10px;
+            color: #888;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .trend-line {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .trend-up {
+            color: #00ff88;
+        }
+
+        .record-card {
+            background: #00ff8811;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+            text-align: center;
+            border: 1px solid #00ff8833;
+        }
+
+        .record-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+
+        /* Temporizador */
+        .timer-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .timer-number {
+            font-size: 120px;
+            font-weight: bold;
+            font-family: monospace;
+            margin: 30px 0;
+            color: #00ff88;
+        }
+
+        .timer-label {
+            font-size: 24px;
+            color: #888;
+        }
+
+        .timer-buttons {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .rule-text {
+            color: #ffaa00;
+            font-size: 13px;
+            margin-top: 8px;
+            text-align: center;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Pantalla principal -->
+<div id="mainScreen" class="screen active">
+    <div class="header">
+        <h1>🏋️ Mi Entreno</h1>
+    </div>
+    <div id="routinesList"></div>
+</div>
+
+<!-- Pantalla de entrenamiento -->
+<div id="workoutScreen" class="screen">
+    <div class="header">
+        <button class="btn-outline" onclick="cancelWorkout()">Cancelar</button>
+        <h2 id="workoutTitle"></h2>
+        <div style="width: 60px;"></div>
+    </div>
+    <div id="exercisesList"></div>
+</div>
+
+<!-- Pantalla de rendimiento -->
+<div id="progressScreen" class="screen">
+    <div class="header">
+        <h1>📈 Mi Progreso</h1>
+    </div>
+    <div id="progressCharts"></div>
+</div>
+
+<!-- Barra de pestañas -->
+<div class="tab-bar">
+    <div class="tab active" onclick="showScreen('main')">
+        <span class="tab-icon">🏋️</span>
+        <span>Entrenar</span>
+    </div>
+    <div class="tab" onclick="showScreen('progress')">
+        <span class="tab-icon">📊</span>
+        <span>Progreso</span>
+    </div>
+</div>
+
+<script>
+    // ========== IMÁGENES REALES PARA CADA EJERCICIO (DESDE INTERNET) ==========
+    const exerciseImages = {
+        // Empuje
+        "Flexiones": "https://images.unsplash.com/photo-1598971639058-2a6d7d4d0d6f?w=200&h=200&fit=crop",
+        "Fondos en silla": "https://images.unsplash.com/photo-1599058917765-a3f8b2a0a5e2?w=200&h=200&fit=crop",
+        "Pike push-ups": "https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=200&h=200&fit=crop",
+        "Flexiones lentas": "https://images.unsplash.com/photo-1598971639058-2a6d7d4d0d6f?w=200&h=200&fit=crop",
+        "Plancha": "https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=200&h=200&fit=crop",
+        // Tirón
+        "Dominadas/Remo mesa": "https://images.unsplash.com/photo-1598266663439-2056e6900339?w=200&h=200&fit=crop",
+        "Remo cerrado": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=200&h=200&fit=crop",
+        "Colgado máximo": "https://images.unsplash.com/photo-1598971639058-2a6d7d4d0d6f?w=200&h=200&fit=crop",
+        "Encogimientos escapulares": "https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=200&h=200&fit=crop",
+        "Elevaciones de piernas": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop",
+        // Mix adicionales
+        "Sentadillas": "https://images.unsplash.com/photo-1566241142559-40e1dab266c6?w=200&h=200&fit=crop"
+    };
+
+    // ========== RUTINAS (formato CORRECTO: series x min-max) ==========
+    const routines = [
+        {
+            id: 1,
+            name: "Empuje",
+            day: "Lunes",
+            time: "19:30",
+            rule: "Quédate a 1-2 repeticiones del fallo técnico",
+            restTime: 75,
+            exercises: [
+                { name: "Flexiones", series: 3, minReps: 6, maxReps: 12, unit: "reps" },
+                { name: "Fondos en silla", series: 3, minReps: 6, maxReps: 10, unit: "reps" },
+                { name: "Pike push-ups", series: 3, minReps: 6, maxReps: 10, unit: "reps" },
+                { name: "Flexiones lentas", series: 2, minReps: 6, maxReps: 10, unit: "reps" },
+                { name: "Plancha", series: 3, minReps: 30, maxReps: 40, unit: "seg" }
+            ]
+        },
+        {
+            id: 2,
+            name: "Tirón",
+            day: "Miércoles",
+            time: "19:30",
+            rule: "Controla cada repetición",
+            restTime: 75,
+            exercises: [
+                { name: "Dominadas/Remo mesa", series: 3, minReps: 5, maxReps: 10, unit: "reps" },
+                { name: "Remo cerrado", series: 3, minReps: 6, maxReps: 10, unit: "reps" },
+                { name: "Colgado máximo", series: 3, minReps: 1, maxReps: 1, unit: "aguantar" },
+                { name: "Encogimientos escapulares", series: 3, minReps: 10, maxReps: 15, unit: "reps" },
+                { name: "Elevaciones de piernas", series: 3, minReps: 10, maxReps: 15, unit: "reps" }
+            ]
+        },
+        {
+            id: 3,
+            name: "Mix",
+            day: "Viernes",
+            time: "19:30",
+            rule: "Cumple aunque estés cansado",
+            restTime: 75,
+            exercises: [
+                { name: "Flexiones", series: 3, minReps: 6, maxReps: 12, unit: "reps" },
+                { name: "Sentadillas", series: 3, minReps: 15, maxReps: 20, unit: "reps" },
+                { name: "Pike push-ups", series: 3, minReps: 6, maxReps: 10, unit: "reps" },
+                { name: "Fondos en silla", series: 3, minReps: 6, maxReps: 10, unit: "reps" },
+                { name: "Elevaciones de piernas", series: 3, minReps: 10, maxReps: 15, unit: "reps" },
+                { name: "Plancha", series: 3, minReps: 40, maxReps: 40, unit: "seg" }
+            ]
+        }
+    ];
+
+    // Estado
+    let currentRoutine = null;
+    let currentExerciseIndex = 0;
+    let currentSeriesInExercise = 0;
+    let workoutLog = [];
+    let allWorkouts = [];
+    let timerInterval = null;
+
+    // Cargar historial
+    function loadHistory() {
+        const saved = localStorage.getItem("workoutHistory");
+        if (saved) {
+            allWorkouts = JSON.parse(saved);
+        }
+        updateProgressCharts();
+    }
+
+    function saveHistory() {
+        localStorage.setItem("workoutHistory", JSON.stringify(allWorkouts));
+        updateProgressCharts();
+    }
+
+    // Mostrar récord personal
+    function getPersonalRecord(exerciseName) {
+        let maxReps = 0;
+        allWorkouts.forEach(workout => {
+            workout.exercises.forEach(ex => {
+                if (ex.name === exerciseName) {
+                    ex.sets.forEach(set => {
+                        if (set.reps > maxReps) maxReps = set.reps;
+                    });
+                }
+            });
+        });
+        return maxReps > 0 ? maxReps : null;
+    }
+
+    // Renderizar rutinas
+    function renderRoutines() {
+        const container = document.getElementById("routinesList");
+        if (!container) return;
+        container.innerHTML = routines.map(r => `
+            <div class="routine-card" onclick="startRoutine(${r.id})">
+                <div class="routine-name">${r.name}</div>
+                <div class="routine-day">${r.day}</div>
+                <div class="routine-time">⏰ ${r.time} | Descanso: ${r.restTime}s</div>
+                <div class="rule-text">📌 ${r.rule}</div>
+            </div>
+        `).join("");
+    }
+
+    // Empezar rutina
+    function startRoutine(routineId) {
+        currentRoutine = routines.find(r => r.id === routineId);
+        currentExerciseIndex = 0;
+        currentSeriesInExercise = 0;
+        workoutLog = [];
+        
+        currentRoutine.exercises.forEach(ex => {
+            workoutLog.push({
+                name: ex.name,
+                sets: []
+            });
+        });
+        
+        showExercise();
+        showScreen('workout');
+        document.getElementById("workoutTitle").innerText = currentRoutine.name;
+    }
+
+    // Mostrar ejercicio actual con imagen
+    function showExercise() {
+        const exercise = currentRoutine.exercises[currentExerciseIndex];
+        const currentSet = currentSeriesInExercise + 1;
+        const totalSets = exercise.series;
+        const imageUrl = exerciseImages[exercise.name] || "https://images.unsplash.com/photo-1599058917765-a3f8b2a0a5e2?w=200&h=200&fit=crop";
+        const personalRecord = getPersonalRecord(exercise.name);
+        
+        const container = document.getElementById("exercisesList");
+        
+        // Generar botones según el rango (minReps a maxReps)
+        let repButtons = "";
+        for (let r = exercise.minReps; r <= Math.min(exercise.maxReps, 30); r++) {
+            repButtons += `<button class="rep-btn" onclick="completeSet(${r})">${r}</button>`;
+        }
+        
+        // Mostrar texto de objetivo según la unidad
+        let targetText = "";
+        if (exercise.unit === "seg") {
+            targetText = `${exercise.series} x ${exercise.minReps}-${exercise.maxReps} segundos`;
+        } else if (exercise.unit === "aguantar") {
+            targetText = `${exercise.series} veces - aguantar máximo`;
+        } else {
+            targetText = `${exercise.series} x ${exercise.minReps}-${exercise.maxReps} repeticiones`;
+        }
+        
+        container.innerHTML = `
+            <div class="exercise-card">
+                <div class="exercise-header">
+                    <img class="exercise-image" src="${imageUrl}" alt="${exercise.name}" onerror="this.src='https://images.unsplash.com/photo-1599058917765-a3f8b2a0a5e2?w=200&h=200&fit=crop'">
+                    <div class="exercise-info">
+                        <div class="exercise-name">${exercise.name}</div>
+                        <div class="exercise-target">🎯 ${targetText}</div>
+                    </div>
+                </div>
+                ${personalRecord ? `<div class="record-card">🏆 Tu récord: <span class="record-number">${personalRecord}</span> ${exercise.unit === 'seg' ? 'segundos' : (exercise.unit === 'aguantar' ? 'segundos' : 'reps')}</div>` : ''}
+                <div class="series-counter">📋 Serie ${currentSet} de ${totalSets}</div>
+                <div class="reps-buttons">
+                    ${repButtons}
+                </div>
+            </div>
+        `;
+    }
+
+    // Completar serie con temporizador
+    function completeSet(reps) {
+        const exercise = currentRoutine.exercises[currentExerciseIndex];
+        
+        workoutLog[currentExerciseIndex].sets.push({
+            reps: reps,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (currentSeriesInExercise + 1 < exercise.series) {
+            currentSeriesInExercise++;
+            showExercise();
+            showRestTimer();
+        } else {
+            if (currentExerciseIndex + 1 < currentRoutine.exercises.length) {
+                currentExerciseIndex++;
+                currentSeriesInExercise = 0;
+                showExercise();
+                showRestTimer();
+            } else {
+                finishWorkout();
+            }
+        }
+    }
+
+    // Mostrar temporizador de descanso
+    function showRestTimer() {
+        let restSeconds = currentRoutine.restTime;
+        
+        const timerDiv = document.createElement('div');
+        timerDiv.id = 'restTimer';
+        timerDiv.className = 'timer-fullscreen';
+        timerDiv.innerHTML = `
+            <div class="timer-label">⏱️ DESCANSO</div>
+            <div class="timer-number" id="timerNumber">${restSeconds}</div>
+            <div style="color: #888;">Próxima serie en...</div>
+            <div class="timer-buttons">
+                <button class="btn-outline" onclick="skipRest()">Saltar ⏩</button>
+            </div>
+        `;
+        document.body.appendChild(timerDiv);
+        
+        timerInterval = setInterval(() => {
+            restSeconds--;
+            const timerNum = document.getElementById('timerNumber');
+            if (timerNum) timerNum.innerText = restSeconds;
+            
+            if (restSeconds <= 0) {
+                clearInterval(timerInterval);
+                const timer = document.getElementById('restTimer');
+                if (timer) timer.remove();
+                if (navigator.vibrate) navigator.vibrate(200);
+            }
+        }, 1000);
+    }
+
+    function skipRest() {
+        if (timerInterval) clearInterval(timerInterval);
+        const timer = document.getElementById('restTimer');
+        if (timer) timer.remove();
+    }
+
+    function finishWorkout() {
+        const workoutRecord = {
+            date: new Date().toISOString(),
+            routineName: currentRoutine.name,
+            exercises: workoutLog
+        };
+        
+        allWorkouts.push(workoutRecord);
+        saveHistory();
+        
+        alert("🎉 ¡Entrenamiento completado! Revisa tu progreso en la pestaña 📊");
+        cancelWorkout();
+    }
+
+    function cancelWorkout() {
+        if (timerInterval) clearInterval(timerInterval);
+        const timer = document.getElementById('restTimer');
+        if (timer) timer.remove();
+        currentRoutine = null;
+        showScreen('main');
+        renderRoutines();
+    }
+
+    // GRÁFICOS DE PROGRESO
+    function updateProgressCharts() {
+        const container = document.getElementById("progressCharts");
+        if (!container) return;
+        
+        if (allWorkouts.length === 0) {
+            container.innerHTML = `
+                <div class="stats-container" style="text-align: center;">
+                    <p style="color: #888;">🏋️‍♂️ Completa tu primer entrenamiento</p>
+                    <p style="color: #555; font-size: 14px; margin-top: 10px;">Registra tus series y verás gráficos de progreso</p>
+                </div>
+            `;
+            return;
+        }
+        
+        // Estadísticas generales
+        const totalWorkouts = allWorkouts.length;
+        const totalSets = allWorkouts.reduce((sum, w) => {
+            return sum + w.exercises.reduce((s, ex) => s + ex.sets.length, 0);
+        }, 0);
+        
+        let html = `
+            <div class="stats-container">
+                <div class="stats-header">
+                    <span class="stats-title">📊 Estadísticas</span>
+                    <span class="stats-badge">${totalWorkouts} entrenos</span>
+                </div>
+                <div style="display: flex; justify-content: space-around; text-align: center;">
+                    <div>
+                        <div style="font-size: 28px; font-weight: bold; color: #00ff88;">${totalWorkouts}</div>
+                        <div style="font-size: 12px; color: #888;">Entrenos</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 28px; font-weight: bold; color: #00ff88;">${totalSets}</div>
+                        <div style="font-size: 12px; color: #888;">Series totales</div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Agrupar por ejercicio
+        const exerciseData = {};
+        
+        allWorkouts.forEach(workout => {
+            workout.exercises.forEach(ex => {
+                if (!exerciseData[ex.name]) {
+                    exerciseData[ex.name] = [];
+                }
+                ex.sets.forEach(set => {
+                    exerciseData[ex.name].push({
+                        date: new Date(workout.date),
+                        reps: set.reps
+                    });
+                });
+            });
+        });
+        
+        const sortedExercises = Object.keys(exerciseData).sort();
+        
+        for (const exerciseName of sortedExercises) {
+            const data = exerciseData[exerciseName];
+            const last8 = data.slice(-8);
+            const maxReps = Math.max(...data.map(d => d.reps));
+            const avgReps = Math.round(data.reduce((s, d) => s + d.reps, 0) / data.length);
+            
+            html += `
+                <div class="chart-container">
+                    <div class="chart-title">
+                        🏋️ ${exerciseName}
+                    </div>
+                    <div class="chart-bars">
+                        ${last8.map((item, idx) => `
+                            <div class="bar-wrapper">
+                                <div class="bar-value">${item.reps}</div>
+                                <div class="bar" style="height: ${Math.min(item.reps * 5, 140)}px; width: 38px;"></div>
+                                <div class="bar-label">#${idx + 1}</div>
+                            </div>
+                        `).join("")}
+                    </div>
+                    <div class="trend-line">
+                        <span>🏆 Récord: ${maxReps} reps</span>
+                        <span>📊 Promedio: ${avgReps} reps</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = html;
+    }
+
+    // Cambiar pantalla
+    function showScreen(screen) {
+        const mainScreen = document.getElementById("mainScreen");
+        const workoutScreen = document.getElementById("workoutScreen");
+        const progressScreen = document.getElementById("progressScreen");
+        
+        mainScreen.classList.remove("active");
+        workoutScreen.classList.remove("active");
+        progressScreen.classList.remove("active");
+        
+        if (screen === 'main') {
+            mainScreen.classList.add("active");
+            renderRoutines();
+        } else if (screen === 'workout' && currentRoutine) {
+            workoutScreen.classList.add("active");
+        } else if (screen === 'progress') {
+            progressScreen.classList.add("active");
+            updateProgressCharts();
+        }
+        
+        document.querySelectorAll('.tab').forEach((tab, idx) => {
+            if ((screen === 'main' && idx === 0) || (screen === 'progress' && idx === 1)) {
+                tab.classList.add("active");
+            } else {
+                tab.classList.remove("active");
+            }
+        });
+    }
+
+    // Inicializar
+    renderRoutines();
+    loadHistory();
+</script>
+</body>
+</html>
